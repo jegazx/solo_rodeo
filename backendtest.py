@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship, sessionmaker, declarative_base, joinedl
 
 
 Base = declarative_base()
-engine = create_engine('sqlite:///zaidimai.db')
+engine = create_engine('sqlite:///zaidimaitest.db')
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -44,15 +44,12 @@ class Zanras(Base):
     zaidimai = relationship("Zaidimas", secondary=benroji_lentele, back_populates="zanrai")
 
 def add_zanras(zanrai):
-    zanrai_obj_list = []
-    for zanras in zanrai:
-        zanras_obj = session.query(Zanras).filter_by(zanro_pavadinimas=zanras).first()
-        if not zanras_obj:
-            zanras_obj = Zanras(zanro_pavadinimas=zanras)
-            session.add(zanras_obj)
-            session.commit()
-        zanrai_obj_list.append(zanras_obj)
-    return zanrai_obj_list
+    zanras_obj = session.query(Zanras).filter_by(zanro_pavadinimas=zanrai).first()
+    if not zanras_obj:
+        zanras_obj = Zanras(zanro_pavadinimas=zanrai)
+        session.add(zanras_obj)
+        session.commit()
+
 
 def add_kurejas(kurejas):
     kurejas_obj = session.query(Kurejas).filter_by(kurejo_pavadinimas=kurejas).first()
@@ -62,11 +59,18 @@ def add_kurejas(kurejas):
         session.commit()    
 
 def add_game(zaidimo_pavadinimas, kurejas, zanrai, metai, youtube_link):
+    add_kurejas(kurejas)
+    for zanras in zanrai:
+        add_zanras(zanras)
+
     kurejas_obj = session.query(Kurejas).filter_by(kurejo_pavadinimas=kurejas).first()
-    zanrai_obj_list = add_zanras(zanrai)
+    zanrai_obj_list = [session.query(Zanras).filter_by(zanro_pavadinimas=zanras).first() for zanras in zanrai]
     new_game = Zaidimas(zaidimo_pavadinimas=zaidimo_pavadinimas, kurejas=kurejas_obj, zanrai=zanrai_obj_list, metai=metai, youtube_link=youtube_link)
     session.add(new_game)
     session.commit()
+
+
+
 
 def esami_kurejai():
     with Session() as session:

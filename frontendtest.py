@@ -1,5 +1,5 @@
 import PySimpleGUI as sg
-from backend import *
+from backendtest import *
 
 
 menu_def = [['Naujas zanras', ['Prideti zanra']], ['Naujas kurejas', ['Prideti kureja']]]
@@ -87,9 +87,10 @@ while True:
                     if naujas_zanras:
                         zanras.append(naujas_zanras)
                     zanras_obj_list = [session.query(Zanras).filter_by(zanro_pavadinimas=zanras).first() for zanras in zanras]
-                    add_game(zaidimo_pavadinimas, kurejas, zanras, metai, youtube_link)
+                    add_game(zaidimo_pavadinimas, kurejas, zanras_obj_list, metai, youtube_link)
                     add_game_window.close()
                     break
+
 
     elif event == 'Prideti zanra':
         zanras_window = open_zanras_window()
